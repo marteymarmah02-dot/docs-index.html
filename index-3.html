@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Congregation Literature</title>
+<style>
+:root{
+  --bg:#121212; --surface:#1A1A1A; --card:#232323; --card2:#2A2A2A;
+  --accent:#D2691E; --accent-dim:#7A3D17; --banner-bg:#3A2413;
+  --active-bg:#3D2015;
+  --text:#FFFFFF; --muted:#9A9A9A; --muted2:#787878;
+  --border:#2E2E2E; --ok:#3FA872; --ok-bg:#173324;
+  --danger:#D9534F; --danger-bg:#3A1E1C;
+  --tap:48px; --radius:14px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:30; background:var(--bg);
+  display:flex; align-items:center; gap:.6rem; padding:.7rem .8rem; min-height:60px;
+}
+.icon-sq{
+  width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+  background:var(--accent); border-radius:12px; flex-shrink:0; border:none; color:#fff;
+}
+.icon-sq svg{ display:block; }
+.topbar-page{ font-size:1.15rem; font-weight:700; margin-left:.1rem; }
+
+/* ---------- drawer ---------- */
+.scrim{ position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:40; opacity:0; pointer-events:none; transition:opacity .2s; }
+.scrim.open{ opacity:1; pointer-events:auto; }
+.drawer{
+  position:fixed; top:0; left:0; bottom:0; width:85%; max-width:340px; background:#161616;
+  z-index:50; transform:translateX(-100%); transition:transform .22s ease; overflow-y:auto;
+}
+.drawer.open{ transform:translateX(0); }
+.drawer-header{ display:flex; align-items:flex-start; gap:.7rem; padding:1.1rem 1rem .3rem; }
+.drawer-brand-icon{ width:44px; height:44px; border-radius:12px; background:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; }
+.drawer-brand-text{ flex:1; line-height:1.2; padding-top:.1rem; }
+.drawer-brand-text .l1{ font-weight:700; font-size:1.05rem; color:#fff; }
+.drawer-brand-text .l2{ font-weight:700; font-size:1.05rem; color:var(--accent); }
+.drawer-close{ width:36px; height:36px; border-radius:999px; background:#2A2A2A; display:flex; align-items:center; justify-content:center; color:#fff; font-size:16px; flex-shrink:0; border:none; }
+.drawer-cong{ padding:.4rem 1rem 1rem; font-size:.78rem; color:var(--muted); letter-spacing:.02em; }
+.drawer-section{ padding:1rem 1rem .4rem; font-size:11px; font-weight:800; letter-spacing:.09em; color:var(--muted2); text-transform:uppercase; }
+.drawer nav{ padding-bottom:2rem; }
+.drawer-item{
+  display:block; width:calc(100% - 1.2rem); margin:.15rem .6rem; text-align:left; padding:.85rem .9rem; min-height:var(--tap);
+  color:#E6E6E6; font-size:1rem; border-radius:var(--radius); background:none; border:none;
+}
+.drawer-item.active{ background:var(--active-bg); color:var(--accent); font-weight:700; }
+.drawer-item:not(.active):hover{ background:#1F1F1F; }
+
+/* ---------- layout ---------- */
+.wrap{ max-width:640px; margin:0 auto; padding:.9rem .9rem 3rem; }
+.eyebrow{ font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); font-weight:700; }
+h1.page-title{ font-size:2rem; font-weight:800; margin:.2rem 0 0; }
+.subtext{ color:var(--muted); font-size:.9rem; margin-top:.35rem; }
+.banner{
+  margin-top:1.1rem; background:var(--banner-bg); border-radius:999px; padding:1rem 1.3rem; font-size:.95rem; color:#fff;
+}
+.banner b{ font-weight:700; }
+
+section{ margin-top:1.7rem; }
+h2.section-title{ font-size:1.05rem; font-weight:700; margin:0 0 .6rem; }
+.eyebrow-label{ font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted2); font-weight:800; margin-bottom:.7rem; }
+
+.field-label{ display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:.4rem; text-transform:uppercase; letter-spacing:.03em;}
+.field-select, .field-input{
+  width:100%; min-height:var(--tap); border-radius:var(--radius); background:var(--card2); border:1px solid var(--border);
+  color:#fff; padding:0 .9rem; font-size:1rem;
+}
+.field-select:focus, .field-input:focus{ border-color:var(--accent); }
+.search-row{ display:flex; gap:.5rem; }
+.search-row .field-input{ flex:1; }
+.search-btn{ width:var(--tap); height:var(--tap); border-radius:var(--radius); background:var(--card2); border:1px solid var(--border); color:var(--muted); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+
+/* quick action cards (Home) */
+.qa-card{
+  display:flex; align-items:center; justify-content:space-between; gap:.6rem; width:100%; text-align:left;
+  min-height:64px; padding:1rem 1.1rem; border-radius:var(--radius); background:var(--card); border:none; margin-top:.7rem;
+}
+.qa-card .qa-title{ font-weight:700; font-size:1rem; color:#fff; }
+.qa-card .qa-sub{ font-size:.85rem; color:var(--muted); margin-top:.2rem; }
+.qa-card .chev{ color:var(--muted2); font-size:1.3rem; flex-shrink:0; }
+
+/* at a glance rows */
+.glance-row{
+  display:flex; align-items:center; justify-content:space-between; min-height:56px; padding:1rem 1.1rem;
+  border-radius:var(--radius); background:var(--card); margin-top:.7rem;
+}
+.glance-label{ font-weight:700; font-size:1rem; }
+.glance-value{ font-weight:800; font-size:1.4rem; color:var(--accent); }
+
+.cat-list{ margin-top:.9rem; }
+.cat-item{
+  display:flex; align-items:center; justify-content:space-between; width:100%; text-align:left;
+  min-height:var(--tap); padding:.85rem 0; border-bottom:1px solid var(--border); color:#9DBEE8; font-size:1rem; background:none; border-left:none; border-right:none; border-top:none;
+}
+.cat-item .chev{ color:var(--muted2); }
+
+.item-list{ margin-top:.6rem; display:flex; flex-direction:column; gap:.55rem; }
+.item-card{
+  display:flex; align-items:center; justify-content:space-between; gap:.6rem;
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:.75rem .9rem;
+}
+.item-name{ font-size:.92rem; }
+.item-sub{ font-size:.75rem; color:var(--muted); margin-top:.1rem; }
+.add-btn{
+  min-width:44px; min-height:36px; border-radius:8px; background:var(--accent); color:#fff; font-weight:700; font-size:.85rem;
+  padding:0 .8rem; border:none;
+}
+
+.btn{ min-height:var(--tap); display:inline-flex; align-items:center; justify-content:center; gap:.4rem; border-radius:var(--radius); padding:0 1.1rem; font-weight:700; font-size:.92rem; border:none; }
+.btn-primary{ background:var(--accent); color:#fff; }
+.btn-primary:hover{ background:#b85a19; }
+.btn-ghost{ background:var(--card2); color:#fff; border:1px solid var(--border); }
+.btn-ghost:hover{ background:#333; }
+.btn-danger{ background:var(--danger-bg); color:#F5A9A6; }
+.btn-block{ width:100%; }
+.btn-sm{ min-height:38px; padding:0 .8rem; font-size:.82rem; border-radius:9px; }
+
+.rr-card{ background:var(--card); border-radius:var(--radius); padding:1rem; margin-top:.75rem; }
+.rr-lang{ color:var(--accent); font-weight:800; font-size:1.15rem; }
+.rr-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:.8rem; }
+.rr-label{ color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.03em; font-weight:700;}
+.rr-val{ font-size:1.3rem; font-weight:700; margin-top:.2rem; }
+.rr-val.editable-input{ width:100%; background:var(--card2); border:1px solid var(--border); border-radius:8px; padding:.4rem .6rem; font-size:1.05rem; color:#fff; margin-top:.25rem;}
+.rr-actions{ display:flex; gap:.5rem; margin-top:.9rem; }
+
+.toast{ position:fixed; bottom:1.25rem; left:50%; transform:translateX(-50%); background:#fff; color:#111; font-size:.875rem; font-weight:600; padding:.6rem 1.1rem; border-radius:999px; box-shadow:0 10px 25px -5px rgba(0,0,0,.4); z-index:80;}
+.modal-scrim{ position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:60; display:flex; align-items:flex-end; justify-content:center;}
+.modal{ background:#1C1C1C; border-top-left-radius:18px; border-top-right-radius:18px; width:100%; max-width:640px; padding:1.2rem 1rem 1.6rem; max-height:85vh; overflow-y:auto;}
+.modal h3{ margin:0 0 1rem; font-size:1.1rem; }
+.modal .field-label{ margin-top:.9rem; }
+.modal .field-label:first-of-type{ margin-top:0; }
+
+.mono{ font-family:'IBM Plex Mono',ui-monospace,monospace; }
+table.simple{ width:100%; border-collapse:collapse; margin-top:.6rem; font-size:.88rem; }
+table.simple th{ text-align:left; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.03em; padding:.4rem .5rem; border-bottom:1px solid var(--border); }
+table.simple td{ padding:.6rem .5rem; border-bottom:1px solid var(--border); }
+.empty{ border:1px dashed var(--border); border-radius:var(--radius); padding:1.5rem 1rem; text-align:center; color:var(--muted); font-size:.9rem; margin-top:.75rem;}
+.pill{ display:inline-flex; align-items:center; border-radius:999px; padding:.25rem .65rem; font-size:11px; font-weight:700; text-transform:uppercase; }
+.pill-ok{ background:var(--ok-bg); color:#7FD9A6; }
+.pill-pending{ background:#3A2E17; color:#E0B15C; }
+.pill-role{ background:var(--card2); color:var(--accent); border:1px solid var(--border); }
+.pill-danger{ background:var(--danger-bg); color:#F5A9A6; }
+
+/* ---------- auth gate ---------- */
+#authGate{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.2rem; }
+.auth-card{ width:100%; max-width:400px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.4rem 1.2rem; }
+.auth-brand{ display:flex; align-items:center; gap:.6rem; margin-bottom:1rem; }
+.auth-brand .icon-sq{ position:static; }
+.auth-tabs{ display:flex; gap:.4rem; margin-bottom:1rem; background:var(--card2); border-radius:12px; padding:.3rem; }
+.auth-tab{ flex:1; text-align:center; padding:.6rem 0; border-radius:9px; background:none; border:none; color:var(--muted); font-weight:700; font-size:.88rem; }
+.auth-tab.active{ background:var(--accent); color:#fff; }
+.auth-err{ background:var(--danger-bg); color:#F5A9A6; border-radius:10px; padding:.6rem .8rem; font-size:.85rem; margin-top:.8rem; }
+.auth-note{ color:var(--muted); font-size:.8rem; margin-top:.7rem; line-height:1.4; }
+#appShell{ display:none; }
+.duty-card{ background:var(--banner-bg); border-radius:18px; padding:1.3rem; margin-top:1rem; }
+.duty-eyebrow{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#E7B98A; font-weight:800; }
+.duty-name{ font-size:1.7rem; font-weight:800; margin-top:.3rem; }
+.duty-grid{ display:grid; grid-template-columns:1fr 1fr; gap:.9rem; margin-top:1rem; }
+.duty-label{ font-size:11px; text-transform:uppercase; color:#D9A876; font-weight:700; letter-spacing:.03em; }
+.duty-val{ font-size:1.05rem; font-weight:700; margin-top:.15rem; }
+
+/* ---------- professional polish layer ---------- */
+:root{
+  --bg:#0b0d12;
+  --surface:#11151d;
+  --card:#171c26;
+  --card2:#1d2430;
+  --accent:#f28a4b;
+  --accent-strong:#ff9f62;
+  --accent-dim:#6f3822;
+  --banner-bg:linear-gradient(135deg,#3d2319 0%,#241a19 100%);
+  --active-bg:rgba(242,138,75,.14);
+  --text:#f7f8fb;
+  --muted:#a7afbe;
+  --muted2:#6f7888;
+  --border:#29313d;
+  --ok:#56c58a;
+  --ok-bg:rgba(86,197,138,.13);
+  --danger:#ef7770;
+  --danger-bg:rgba(239,119,112,.13);
+  --tap:48px;
+  --radius:16px;
+  --shadow:0 18px 50px rgba(0,0,0,.22);
+}
+html{color-scheme:dark;scroll-behavior:smooth;}
+#appShell{display:block;}
+body{
+  background:
+    radial-gradient(circle at 8% -8%,rgba(242,138,75,.11),transparent 30rem),
+    radial-gradient(circle at 100% 0%,rgba(62,113,170,.10),transparent 28rem),
+    var(--bg);
+  letter-spacing:-.01em;
+}
+button,input,select,textarea{transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease,opacity .18s ease;}
+button:hover{transform:translateY(-1px);}
+button:active{transform:translateY(0);}
+.topbar{
+  min-height:72px;padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);
+  background:rgba(11,13,18,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+}
+.topbar-page{font-size:1.05rem;letter-spacing:-.02em;}
+.topbar::after{content:'Local workspace';margin-left:auto;color:var(--muted2);font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.icon-sq{box-shadow:0 8px 22px rgba(242,138,75,.18);}
+.icon-sq:nth-child(2){background:var(--card2);border:1px solid var(--border);box-shadow:none;}
+.drawer{background:rgba(15,18,25,.97);border-right:1px solid rgba(255,255,255,.06);box-shadow:20px 0 60px rgba(0,0,0,.18);}
+.drawer-header{padding-top:1.35rem;}
+.drawer-brand-icon{box-shadow:0 8px 24px rgba(242,138,75,.18);}
+.drawer-cong{line-height:1.45;}
+.drawer-section{padding-top:1.15rem;}
+.drawer-item{font-size:.92rem;color:#cbd1dc;}
+.drawer-item.active{box-shadow:inset 3px 0 var(--accent);}
+.wrap{max-width:760px;padding-top:1.35rem;}
+.eyebrow{font-size:11px;letter-spacing:.13em;color:var(--accent-strong);}
+h1.page-title{font-size:clamp(2rem,7vw,2.8rem);line-height:1.03;letter-spacing:-.055em;}
+.subtext{line-height:1.55;}
+.banner{background:var(--banner-bg);border:1px solid rgba(242,138,75,.18);box-shadow:0 14px 34px rgba(0,0,0,.14);line-height:1.45;}
+section{margin-top:2rem;}
+.eyebrow-label{letter-spacing:.13em;color:#8892a2;}
+.field-label{font-size:11px;letter-spacing:.08em;color:#9ca6b6;margin-top:.85rem;}
+.field-input,.field-select{background:rgba(29,36,48,.86);border-color:#303a49;box-shadow:inset 0 1px 0 rgba(255,255,255,.02);}
+.field-input:hover,.field-select:hover,.search-btn:hover{border-color:#465264;}
+.field-input:focus,.field-select:focus{box-shadow:0 0 0 3px rgba(242,138,75,.14);}
+.search-btn{background:var(--card2);border-color:#303a49;}
+.qa-card,.glance-row,.item-card,.rr-card{background:linear-gradient(145deg,rgba(23,28,38,.98),rgba(19,24,33,.98));border:1px solid rgba(255,255,255,.055);box-shadow:0 10px 30px rgba(0,0,0,.12);}
+.qa-card:hover,.glance-row:hover,.item-card:hover,.rr-card:hover{border-color:rgba(242,138,75,.38);box-shadow:0 16px 34px rgba(0,0,0,.2);}
+.qa-card{min-height:72px;padding:1.05rem 1.15rem;}
+.qa-card .qa-sub{line-height:1.4;}
+.glance-row{min-height:66px;}
+.glance-label{font-size:.92rem;color:#dfe3ea;}
+.glance-value{font-size:1.6rem;}
+.item-card{border-radius:var(--radius);}
+.item-name{font-weight:650;line-height:1.35;}
+.item-sub{line-height:1.45;}
+.cat-item{color:#b7d3f7;border-bottom-color:rgba(255,255,255,.08);}
+.cat-item:hover{color:var(--accent-strong);padding-left:.35rem;}
+.btn{box-shadow:0 8px 18px rgba(0,0,0,.12);}
+.btn-primary{background:linear-gradient(135deg,var(--accent-strong),var(--accent));color:#22150f;box-shadow:0 10px 24px rgba(242,138,75,.2);}
+.btn-primary:hover{background:linear-gradient(135deg,#ffad78,#ef7e3c);}
+.btn-ghost{background:var(--card2);}
+.btn-danger{border:1px solid rgba(239,119,112,.16);}
+.add-btn{background:linear-gradient(135deg,var(--accent-strong),var(--accent));color:#22150f;}
+.rr-card{padding:1.15rem;}
+.duty-card{background:linear-gradient(135deg,#4b291d 0%,#25191a 100%);border:1px solid rgba(242,138,75,.2);box-shadow:var(--shadow);}
+.duty-name{letter-spacing:-.04em;line-height:1.12;}
+.pill{letter-spacing:.06em;}
+.empty{background:rgba(23,28,38,.5);border-color:#394354;line-height:1.5;}
+.simple-wrap{overflow-x:auto;border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);background:rgba(17,21,29,.55);}
+table.simple{min-width:560px;margin-top:0;}
+table.simple th{background:rgba(255,255,255,.025);padding:.75rem .65rem;}
+table.simple td{padding:.75rem .65rem;}
+table.simple tr:last-child td{border-bottom:0;}
+.toast{background:#f7f8fb;color:#11151b;box-shadow:0 14px 34px rgba(0,0,0,.35);}
+.modal-scrim{background:rgba(4,6,10,.76);backdrop-filter:blur(6px);}
+.modal{background:linear-gradient(180deg,#171c26,#11151d);border:1px solid rgba(255,255,255,.08);box-shadow:0 -18px 55px rgba(0,0,0,.38);animation:modalIn .2s ease-out;}
+.modal h3{letter-spacing:-.03em;font-size:1.25rem;}
+@keyframes modalIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.hero-card{position:relative;overflow:hidden;margin-top:1.25rem;padding:1.35rem;border:1px solid rgba(242,138,75,.2);border-radius:22px;background:linear-gradient(135deg,rgba(67,37,25,.96),rgba(25,24,31,.96));box-shadow:var(--shadow);}
+.hero-card::after{content:'';position:absolute;width:180px;height:180px;right:-50px;top:-70px;border-radius:50%;background:rgba(242,138,75,.14);filter:blur(2px);}
+.hero-kicker{position:relative;z-index:1;color:#f6c5a2;font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;}
+.hero-title{position:relative;z-index:1;max-width:18ch;margin:.45rem 0 0;font-size:clamp(1.6rem,6vw,2.35rem);line-height:1.05;letter-spacing:-.055em;}
+.hero-note{position:relative;z-index:1;max-width:42ch;margin:.65rem 0 0;color:#e8c8b5;font-size:.88rem;line-height:1.5;}
+.stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;margin-top:.9rem;}
+.stat-card{padding:1rem;border-radius:15px;background:rgba(23,28,38,.92);border:1px solid rgba(255,255,255,.06);}
+.stat-label{color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;}
+.stat-value{margin-top:.35rem;color:var(--text);font-size:1.45rem;font-weight:800;letter-spacing:-.04em;}
+.stat-meta{margin-top:.2rem;color:var(--muted2);font-size:.76rem;line-height:1.35;}
+.section-heading{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.7rem;}
+.section-heading .eyebrow-label{margin-bottom:0;}
+@media (min-width:900px){
+  .drawer{transform:none;width:270px;max-width:none;}
+  .drawer-close{display:none;}
+  .topbar,.wrap{margin-left:270px;max-width:none;}
+  .topbar{padding-left:2rem;padding-right:2rem;}
+  .wrap{padding:2.4rem 3.5rem 5rem;}
+  .topbar .icon-sq:first-child{display:none;}
+  .topbar-page{font-size:1.15rem;}
+  .hero-card{padding:1.8rem;}
+  .stat-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+}
+@media (max-width:520px){
+  .topbar::after{content:'';}
+  .wrap{padding-left:1rem;padding-right:1rem;}
+  .modal{max-height:90vh;}
+  .rr-grid{gap:.7rem;}
+  .rr-val{font-size:1.15rem;}
+}
+
+</style>
+</head>
+<body>
+
+<div id="appShell">
+<div class="topbar">
+  <button class="icon-sq" id="drawerBtn" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <button class="icon-sq" onclick="goPage('home')" aria-label="Home">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M4 19V10.5a1 1 0 0 1 .38-.78l7-5.6a1 1 0 0 1 1.24 0l7 5.6a1 1 0 0 1 .38.78V19a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-4a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" stroke="white" stroke-width="1.7" stroke-linejoin="round"/></svg>
+  </button>
+  <div class="topbar-page" id="topbarTitle">Home</div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="drawer" id="drawer" role="dialog" aria-label="Main menu" aria-hidden="true">
+  <div class="drawer-header">
+    <div class="drawer-brand-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5C10 3.5 6.5 3 4 3v15c2.5 0 6 .5 8 2 2-1.5 5.5-2 8-2V3c-2.5 0-6 .5-8 2z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 5v15" stroke="white" stroke-width="1.6"/></svg>
+    </div>
+    <div class="drawer-brand-text"><div class="l1">Congregation</div><div class="l2">Literature</div></div>
+    <button class="drawer-close" id="drawerCloseBtn" aria-label="Close menu">✕</button>
+  </div>
+  <div class="drawer-cong" id="drawerCong">USHER TOWN GA - ACCRA AA</div>
+  <nav>
+    <div class="drawer-section">Main</div>
+    <button class="drawer-item" data-page="home">Home</button>
+    <button class="drawer-item" data-page="overview">Overview</button>
+    <button class="drawer-item" data-page="litcoord">Literature Coordination</button>
+    <button class="drawer-item" data-page="pubManagement">Publication Management</button>
+    <button class="drawer-item" data-page="guidelines">Instructions &amp; Guidelines</button>
+    <button class="drawer-item" data-page="rotation">Literature Display Rotation</button>
+
+    <div class="drawer-section">Requests</div>
+    <button class="drawer-item" data-page="recurringRequests" data-hint="Watchtower (Study)">Watchtower (Study)</button>
+    <button class="drawer-item" data-page="recurringRequests" data-hint="Meeting Workbook">Meeting Workbook</button>
+    <button class="drawer-item" data-page="recurringRequests" data-hint="Public Magazines">Public Magazines</button>
+    <button class="drawer-item" data-page="otherPubs">Other Publications</button>
+    <button class="drawer-item" data-page="requestPublication" data-cat="Public Witnessing">Public Witnessing Equipment</button>
+
+    <div class="drawer-section">History</div>
+    <button class="drawer-item" data-page="historyRequests">Requests</button>
+    <button class="drawer-item" data-page="historyShipments">Shipments</button>
+
+    <div class="drawer-section">Inventory</div>
+    <button class="drawer-item" data-page="inventoryReports">Inventory Reports</button>
+    <button class="drawer-item" data-page="monthlyMovement">Monthly Movement</button>
+
+  </nav>
+</div>
+
+<div id="app" class="wrap"></div>
+<div id="toastHost"></div>
+<div id="modalHost"></div>
+</div><!-- /appShell -->
+
+<script>
+/* ============================================================
+   OPEN ACCESS
+   -----------------------------------------------------------
+   No sign-in, password, or access code. Anyone who opens this
+   file gets full access straight away. All data is stored
+   locally on the device (localStorage) as before.
+============================================================= */
+let currentUser = { full_name: 'Congregation', role: 'overseer', can_share: true };
+
+function pageAllowedForRole(_page){ return true; }
+
+/* ============================================================
+   OFFICIAL REFERENCE DATA
+   Sourced from the congregation's own uploaded forms:
+   S-14 (Literature Request Form) -> CATEGORIES / master catalog
+   S-80 (Public Witnessing Supplies) -> pricing/specs on witnessing items
+   S-60 (List of Publications Approved for Discard) -> DISCARD_LIST
+   S-56 (Literature Request and Inventory Guidelines) -> GUIDE_S56
+============================================================= */
+
+const CATEGORIES = [
+  { id:'bibles', name:'Bibles', items:[
+    {id:'nwt_5140', code:'5140', mnemonic:'nwt', name:'New World Translation of the Holy Scriptures'},
+    {id:'nwtls_5141', code:'5141', mnemonic:'nwtls', name:'New World Translation of the Holy Scriptures (large size)'},
+    {id:'nwtpkt_5142', code:'5142', mnemonic:'nwtpkt', name:'New World Translation of the Holy Scriptures (pocket-size)'},
+    {id:'nwtsty1-E_5144', code:'5144', mnemonic:'nwtsty1-E', name:'New World Translation of the Holy Scriptures (Study Edition, Matthew–Acts)'},
+  ]},
+  { id:'teaching', name:'Teaching Toolbox', items:[
+    {id:'lff_5445', code:'5445', mnemonic:'lff', name:'Enjoy Life Forever!—An Interactive Bible Course (Book)'},
+    {id:'lc_6654', code:'6654', mnemonic:'lc', name:'Was Life Created?'},
+    {id:'lf_6655', code:'6655', mnemonic:'lf', name:'The Origin of Life—Five Questions Worth Asking'},
+    {id:'lffi_65445', code:'65445', mnemonic:'lffi', name:'Enjoy Life Forever!—Introductory Bible Lessons (Brochure)'},
+    {id:'ll_6657', code:'6657', mnemonic:'ll', name:'Listen to God and Live Forever'},
+    {id:'inv_7305', code:'7305', mnemonic:'inv', name:'Invitation to Congregation Meetings'},
+    {id:'T-30_7130', code:'7130', mnemonic:'T-30', name:'How Do You View the Bible?'},
+    {id:'T-31_7131', code:'7131', mnemonic:'T-31', name:'How Do You View the Future?'},
+    {id:'T-32_7132', code:'7132', mnemonic:'T-32', name:'What Is the Key to Happy Family Life?'},
+    {id:'T-33_7133', code:'7133', mnemonic:'T-33', name:'Who Really Controls the World?'},
+    {id:'T-34_7134', code:'7134', mnemonic:'T-34', name:'Will Suffering Ever End?'},
+    {id:'T-35_7135', code:'7135', mnemonic:'T-35', name:'Can the Dead Really Live Again?'},
+    {id:'T-36_7136', code:'7136', mnemonic:'T-36', name:'What Is the Kingdom of God?'},
+    {id:'T-37_7137', code:'7137', mnemonic:'T-37', name:'Where Can We Find Answers to Life’s Big Questions?'},
+    {id:'jwcd1_8410', code:'8410', mnemonic:'jwcd1', name:'Contact Card for jw.org (Picture of open Bible)'},
+    {id:'jwcd4_8524', code:'8524', mnemonic:'jwcd4', name:'Contact Card for jw.org (jw.org logo only)'},
+    {id:'jwcd9_8569', code:'8569', mnemonic:'jwcd9', name:'Contact Card for Free Bible Course (in-person)'},
+    {id:'jwcd10_8570', code:'8570', mnemonic:'jwcd10', name:'Contact Card for Free Bible Course (virtual)'},
+  ]},
+  { id:'books', name:'Books', items:[
+    {id:'bt_5416', code:'5416', mnemonic:'bt', name:'“Bearing Thorough Witness” About God’s Kingdom'},
+    {id:'cl_5331', code:'5331', mnemonic:'cl', name:'Draw Close to Jehovah'},
+    {id:'ia_5419', code:'5419', mnemonic:'ia', name:'Imitate Their Faith'},
+    {id:'it_5411', code:'5411', mnemonic:'it', name:'Insight on the Scriptures—Complete set'},
+    {id:'jv_5413', code:'5413', mnemonic:'jv', name:'Jehovah’s Witnesses—Proclaimers of God’s Kingdom'},
+    {id:'jy_5425', code:'5425', mnemonic:'jy', name:'Jesus—The Way, the Truth, the Life'},
+    {id:'kr_5422', code:'5422', mnemonic:'kr', name:'God’s Kingdom Rules!'},
+    {id:'lfb_5427', code:'5427', mnemonic:'lfb', name:'Lessons You Can Learn From the Bible'},
+    {id:'lr_5415', code:'5415', mnemonic:'lr', name:'Learn From the Great Teacher'},
+    {id:'od_5332', code:'5332', mnemonic:'od', name:'Organized to Do Jehovah’s Will'},
+    {id:'rr_5435', code:'5435', mnemonic:'rr', name:'Pure Worship of Jehovah—Restored At Last!'},
+    {id:'sjj_5341', code:'5341', mnemonic:'sjj', name:'“Sing Out Joyfully” to Jehovah'},
+    {id:'sjjls_5441', code:'5441', mnemonic:'sjjls', name:'“Sing Out Joyfully” to Jehovah (Large size)'},
+    {id:'sjjyls_5442', code:'5442', mnemonic:'sjjyls', name:'“Sing Out Joyfully” to Jehovah—Lyrics Only'},
+    {id:'yp1_5339', code:'5339', mnemonic:'yp1', name:'Questions Young People Ask—Answers That Work, Vol. 1'},
+    {id:'yp2_5336', code:'5336', mnemonic:'yp2', name:'Questions Young People Ask—Answers That Work, Vol. 2'},
+  ]},
+  { id:'brochures', name:'Brochures and Booklets', items:[
+    {id:'hf_6665', code:'6665', mnemonic:'hf', name:'Your Family Can Be Happy'},
+    {id:'hl_6662', code:'6662', mnemonic:'hl', name:'How Can You Have a Happy Life? (For Jews)'},
+    {id:'la_6647', code:'6647', mnemonic:'la', name:'A Satisfying Life—How to Attain It'},
+    {id:'ld_6658', code:'6658', mnemonic:'ld', name:'Listen to God'},
+    {id:'mb_6663', code:'6663', mnemonic:'mb', name:'My Bible Lessons'},
+    {id:'ol_6648', code:'6648', mnemonic:'ol', name:'The Road to Everlasting Life—Have You Found It? (For Africans)'},
+    {id:'pc_6639', code:'6639', mnemonic:'pc', name:'Lasting Peace and Happiness—How to Find Them (For Chinese)'},
+    {id:'ph_6653', code:'6653', mnemonic:'ph', name:'The Pathway to Peace and Happiness (For Buddhists)'},
+    {id:'rj_6671', code:'6671', mnemonic:'rj', name:'Return to Jehovah'},
+    {id:'rk_6656', code:'6656', mnemonic:'rk', name:'Real Faith—Your Key to a Happy Life (For Muslims)'},
+    {id:'sp_6630', code:'6630', mnemonic:'sp', name:'Spirits of the Dead—Can They Help You or Harm You? Do They Really Exist?'},
+    {id:'th_6667', code:'6667', mnemonic:'th', name:'Apply Yourself to Reading and Teaching'},
+    {id:'wfg_6670', code:'6670', mnemonic:'wfg', name:'Wisdom From the Gospels (For Muslims) — NEW'},
+    {id:'ypq_6684', code:'6684', mnemonic:'ypq', name:'Answers to 10 Questions Young People Ask'},
+  ]},
+  { id:'forms', name:'Forms and Supplies', items:[
+    {id:'bdg_3505', code:'3505', mnemonic:'bdg', name:'Badge Card Holder (Plastic)'},
+    {id:'cblkh1_83731', code:'83731', mnemonic:'cblkh1', name:'Kingdom Hall Contribution Box Labels (donate.jw.org)'},
+    {id:'cblkh2_83732', code:'83732', mnemonic:'cblkh2', name:'Kingdom Hall Contribution Box Labels (not using donate.jw.org)'},
+    {id:'cblkh3_83733', code:'83733', mnemonic:'cblkh3', name:'Kingdom Hall Contribution Box Labels (donate.jw.org, worldwide work only)'},
+    {id:'dpa_9172', code:'9172', mnemonic:'dpa', name:'Durable Power of Attorney (specify state/province)'},
+    {id:'pte_3503', code:'3503', mnemonic:'pte', name:'Plastic Territory Envelope'},
+    {id:'S-4_8704', code:'8704', mnemonic:'S-4', name:'Field Service Report Form'},
+    {id:'S-8_8708', code:'8708', mnemonic:'S-8', name:'House-to-House Record'},
+    {id:'S-12_8712', code:'8712', mnemonic:'S-12', name:'Territory Map Card'},
+    {id:'S-13_8713', code:'8713', mnemonic:'S-13', name:'Territory Assignment Record'},
+    {id:'S-24_8724', code:'8724', mnemonic:'S-24', name:'Receipt'},
+    {id:'S-89_8789', code:'8789', mnemonic:'S-89', name:'Our Christian Life and Ministry Meeting Assignment'},
+    {id:'S-205b_8805', code:'8805', mnemonic:'S-205b', name:'Application for Auxiliary Pioneer Service'},
+  ]},
+  { id:'witnessing', name:'Public Witnessing', items:[
+    {id:'ldcrt_3516-1', code:'3516-1', mnemonic:'ldcrt', name:'Literature Display Cart', spec:'GHS 605.00 · 40.64×40.64×101.6 cm · 9.6 kg'},
+    {id:'ldcrtadp_3520', code:'3520', mnemonic:'ldcrtadp', name:'Literature Display Cart — Clear acrylic display pieces (3/set)'},
+    {id:'ldcrtmbd_3526', code:'3526', mnemonic:'ldcrtmbd', name:'Literature Display Cart — Magnetic board', spec:'GHS 99.00'},
+    {id:'ldcrtrcv_3521', code:'3521', mnemonic:'ldcrtrcv', name:'Literature Display Cart — Rain cover'},
+    {id:'ldcrtrkt_3522', code:'3522', mnemonic:'ldcrtrkt', name:'Literature Display Cart — Repair kit (hardware set)'},
+    {id:'ldcrtwhl_3523', code:'3523', mnemonic:'ldcrtwhl', name:'Literature Display Cart — Wheels (2), bearings (4), cotter pins (2)'},
+    {id:'ldksk_3519-1', code:'3519-1', mnemonic:'ldksk', name:'Literature Display Kiosk', spec:'GHS 858.00 · 13.6 kg'},
+    {id:'ldstd-1_3517-1', code:'3517-1', mnemonic:'ldstd-1', name:'Literature Display Stand (Single-sided)', spec:'GHS 220.00 · 54.5×43×144.3 cm · 1.9 kg'},
+    {id:'ldstd-2_3517-2', code:'3517-2', mnemonic:'ldstd-2', name:'Literature Display Stand (Double-sided)', spec:'GHS 297.00 · 54.5×40×144.3 cm · 3 kg'},
+    {id:'ldstd1sp_3524', code:'3524', mnemonic:'ldstd1sp', name:'Literature Display Stand — Spare Parts Set 1 (single-sided, 8 pcs)'},
+    {id:'ldstd2sp_3525', code:'3525', mnemonic:'ldstd2sp', name:'Literature Display Stand — Spare Parts Set 2 (double-sided, 11 pcs)'},
+    {id:'ldstdcbg_3527', code:'3527', mnemonic:'ldstdcbg', name:'Literature Display Stand — Carrying Bag'},
+    {id:'ldtbl_3518', code:'3518', mnemonic:'ldtbl', name:'Literature Display Table', spec:'GHS 396.00 · 70.1×70.1×80 cm · 6.95 kg'},
+    {id:'mvpfbc1_88532', code:'88532', mnemonic:'mvpfbc1', name:'Free Bible Course magnetic poster (in-person) — NEW', spec:'GHS 13.20'},
+    {id:'mvpfbc2_88533', code:'88533', mnemonic:'mvpfbc2', name:'Free Bible Course magnetic poster (virtual) — NEW', spec:'GHS 13.20'},
+  ]},
+];
+
+const DISCARD_LIST = [
+  { group:'Yearly Publications', items:[
+    { name:'Convention badge card (bdg-cd)', action:'Discard after convention.' },
+    { name:'Convention invitation (CO-inv)', action:'Discard after convention.' },
+    { name:'Examining the Scriptures Daily (es)', action:'Previous years: Discard.' },
+    { name:'Memorial invitation (mi)', action:'Discard after Memorial.' },
+    { name:'Watchtower Library (dvly)', action:'Discard all versions prior to 2017.' },
+    { name:'Yearbook of Jehovah’s Witnesses (yb)', action:'Discard.' },
+  ]},
+  { group:'Replaced Publications', items:[
+    { name:'‘Go, Make Disciples, Baptizing Them’ (ds)', action:'If replaced by Organized to Do Jehovah’s Will (od), destroy.' },
+    { name:'A Study Guide for God’s Word (sgd and sgdls)', action:'If replaced by New World Translation (nwt), discard.' },
+    { name:'An Introduction to God’s Word (igw)', action:'If replaced by New World Translation (nwt), discard.' },
+    { name:'Elementary Bible Teachings (et)', action:'If replaced by ‘Go, Make Disciples’ (ds) or Organized to Do Jehovah’s Will (od), destroy.' },
+    { name:'New World Translation—Christian Greek Scriptures (bi7, bi7ls, nwtgs, nwtgsls)', action:'If replaced by the complete NWT, discard.' },
+    { name:'Organized to Do Jehovah’s Will (od)', action:'Destroy hardcover editions only if replaced by softcover edition.' },
+    { name:'Research Guide for Jehovah’s Witnesses (rsg)', action:'Previous years may be discarded when replaced by newer version.' },
+    { name:'Sing to Jehovah (sn, snlp, sny, snylp, sny55)', action:'If replaced by “Sing Out Joyfully” to Jehovah (sjj), discard.' },
+    { name:'The Greatest Man Who Ever Lived (gt)', action:'If replaced by Jesus—The Way, the Truth, the Life (jy), discard.' },
+    { name:'Watch Tower Publications Index (dx)', action:'Discard one- to five-year indexes when replaced by a larger volume.' },
+  ]},
+  { group:'Miscellaneous Publications', items:[
+    { name:'Any publication published before 2006 (except a short list of named exceptions)', action:'Discard.' },
+    { name:'Audiocassettes, compact discs, and videocassettes', action:'Discard.' },
+    { name:'“Keep Yourselves in God’s Love” (lv and lvlp)', action:'Discard.' },
+    { name:'Live With Jehovah’s Day in Mind (jd and jdlp)', action:'Discard.' },
+    { name:'Revelation—Its Grand Climax At Hand! (re and relp)', action:'Discard.' },
+    { name:'The Bible—What Is Its Message? (bm)', action:'Discard.' },
+    { name:'What Does the Bible Really Teach? (bh and bhlp)', action:'Discard.' },
+    { name:'Would You Like to Know the Truth? (kt)', action:'Discard.' },
+  ]},
+];
+
+const GUIDE_S56 = [
+  { title:'Key principles', points:[
+    'Provide good service to publishers and interested ones.',
+    'Maintain enough stock to last no more than three months.',
+    'Check public-magazine and periodical requests often to avoid overstock.',
+    'Act promptly on branch-office correspondence about new items or changes.',
+  ]},
+  { title:'Congregation roles', points:[
+    'Service overseer: passes branch-office literature information to the literature servant and reviews requests so they match actual need.',
+    'Literature servant: an elder or ministerial servant assigned by the body of elders; granted the “Literature” permission on JW Hub. Other exemplary publishers may assist him.',
+  ]},
+  { title:'Literature servant’s core responsibilities', points:[
+    'Watchtower (study) & Meeting Workbook: base recurring quantities on individuals who specifically ask for a printed copy, plus a few spares; reduce the request if copies are left over.',
+    'Special-request items (e.g. annual items): request promptly, note the requester’s name, and distribute as soon as received — these are not normally kept in stock (except a small supply of the Organized book for new publishers).',
+    'Items in non-coordinated languages: a small supply may be kept if needed; note the requester’s name if it\'s for one person.',
+    'Other publications (e.g. Memorial/convention invitations, badge cards): follow branch-office instructions closely.',
+    'Public witnessing equipment: carts, stands, and magnetic-compatible posters — see the Public Witnessing Supplies (S-80) list.',
+    'Braille: request in harmony with branch-office direction.',
+  ]},
+  { title:'Literature groups & language-coordinating congregations', points:[
+    'A literature group forms when more than one congregation shares a Kingdom Hall.',
+    'Each literature group has a language-coordinating congregation per language, which keeps a common stock supply and requests replenishment based on average monthly movement (aiming for ≤ 3 months of stock).',
+  ]},
+  { title:'Ship-to congregations', points:[
+    'One language-coordinating congregation may be designated to receive, check in, and distribute shipments for the whole literature group.',
+    'Verify each shipment against the JW Hub packing list, then mark it received — this auto-fills the “Received” field on the inventory report.',
+  ]},
+  { title:'Inventory records', points:[
+    'Submit a monthly inventory report by the 10th of the following month (e.g. August’s report is due by September 10), one per coordinated language.',
+    'Congregations not using JW Hub use the Monthly Movement of Literature (S-28) form instead.',
+    'Before a circuit overseer’s visit, give the coordinator of the body of elders the latest Monthly Movement form for each coordinated language.',
+  ]},
+  { title:'Braille literature', points:[
+    'Confirm the person’s braille language/grade and genuine interest before requesting.',
+    'New World Translation in braille has extra qualifying criteria (active publisher/regular attender, reading ability, storage space) — start with one or two volumes.',
+    'A starter kit (Learn to Read Braille) is available in some languages to teach braille reading.',
+  ]},
+  { title:'Shipping, depots, discrepancies & rush shipments', points:[
+    'Keep shipping information current under Literature → Literature Coordination on JW Hub; update via the Shipping Information (S-36) form if needed.',
+    'Report missing items, damaged shipments, or surplus to the Shipping Department immediately — the branch office (not the congregation) handles any carrier claims.',
+    'Rush shipments need Congregation Service Committee approval and may carry extra cost.',
+  ]},
+];
+
+function seedInventory(){ return [
+  { id:'inv_nwt', code:'nwt', pub:'New World Translation', category:'Bibles', lang:'Ga', qty:0, avgMovement:1 },
+  { id:'inv_nwtpkt', code:'nwtpkt', pub:'New World Translation (pocket-size)', category:'Bibles', lang:'Ga', qty:0, avgMovement:0 },
+  { id:'inv_lfb', code:'lfb', pub:'Learn From the Bible', category:'Books', lang:'Ga', qty:0, avgMovement:1 },
+  { id:'inv_lff', code:'lff', pub:'Enjoy Life Forever! (Book)', category:'Books', lang:'Ga', qty:70, avgMovement:2 },
+  { id:'inv_lr', code:'lr', pub:'Teacher', category:'Books', lang:'Ga', qty:13, avgMovement:1 },
+  { id:'inv_lvs', code:'lvs', pub:'Remain in God\'s Love', category:'Books', lang:'Ga', qty:5, avgMovement:3 },
+  { id:'inv_od', code:'od', pub:'Organized', category:'Books', lang:'Ga', qty:25, avgMovement:6 },
+  { id:'inv_scl', code:'scl', pub:'Scriptures for Christian Living', category:'Books', lang:'Ga', qty:36, avgMovement:-3 },
+  { id:'inv_sjj', code:'sjj', pub:'"Sing Out Joyfully"', category:'Books', lang:'Ga', qty:4, avgMovement:0 },
+  { id:'inv_sjjls', code:'sjjls', pub:'"Sing Out Joyfully" (large size)', category:'Books', lang:'Ga', qty:19, avgMovement:-1 },
+  { id:'inv_ay', code:'ay', pub:'Reading and Writing', category:'Brochures and Booklets', lang:'Ga', qty:0, avgMovement:2 },
+  { id:'inv_hf', code:'hf', pub:'Happy Family', category:'Brochures and Booklets', lang:'Ga', qty:16, avgMovement:0 },
+  { id:'inv_ld', code:'ld', pub:'Listen to God', category:'Brochures and Booklets', lang:'Ga', qty:4, avgMovement:1 },
+  { id:'inv_lffi', code:'lffi', pub:'Enjoy Life Forever! (Brochure)', category:'Brochures and Booklets', lang:'Ga', qty:42, avgMovement:24 },
+  { id:'inv_ll', code:'ll', pub:'Listen and Live', category:'Brochures and Booklets', lang:'Ga', qty:53, avgMovement:0 },
+  { id:'inv_lmd', code:'lmd', pub:'Love People', category:'Brochures and Booklets', lang:'Ga', qty:0, avgMovement:1 },
+  { id:'inv_ol', code:'ol', pub:'Road to Life', category:'Brochures and Booklets', lang:'Ga', qty:0, avgMovement:2 },
+  { id:'inv_rj', code:'rj', pub:'Return to Jehovah', category:'Brochures and Booklets', lang:'Ga', qty:7, avgMovement:0 },
+  { id:'inv_sp', code:'sp', pub:'Spirits of the Dead', category:'Brochures and Booklets', lang:'Ga', qty:5, avgMovement:3 },
+  { id:'inv_th', code:'th', pub:'Teaching', category:'Brochures and Booklets', lang:'Ga', qty:7, avgMovement:1 },
+  { id:'inv_ypq', code:'ypq', pub:'10 Questions', category:'Brochures and Booklets', lang:'Ga', qty:0, avgMovement:3 },
+  { id:'inv_jwcd1', code:'jwcd1', pub:'Contact card for jw.org', category:'Forms and Supplies', lang:'Ga', qty:180, avgMovement:8 },
+  { id:'inv_s_4', code:'S-4', pub:'Field Service Report', category:'Forms and Supplies', lang:'Ga', qty:150, avgMovement:135 },
+  { id:'inv_inv', code:'inv', pub:'Invitation to Congregation Meetings', category:'Tracts', lang:'Ga', qty:900, avgMovement:3 },
+  { id:'inv_t_30', code:'T-30', pub:'View the Bible (T-30)', category:'Tracts', lang:'Ga', qty:40, avgMovement:2 },
+  { id:'inv_t_31', code:'T-31', pub:'View the Future (T-31)', category:'Tracts', lang:'Ga', qty:230, avgMovement:9 },
+  { id:'inv_t_32', code:'T-32', pub:'Happy Family Life (Tract No. 32)', category:'Tracts', lang:'Ga', qty:0, avgMovement:41 },
+  { id:'inv_t_33', code:'T-33', pub:'Who Controls the World? (T-33)', category:'Tracts', lang:'Ga', qty:0, avgMovement:15 },
+  { id:'inv_t_34', code:'T-34', pub:'Will Suffering End? (T-34)', category:'Tracts', lang:'Ga', qty:237, avgMovement:0 },
+  { id:'inv_t_35', code:'T-35', pub:'Live Again (T-35)', category:'Tracts', lang:'Ga', qty:0, avgMovement:54 },
+  { id:'inv_t_36', code:'T-36', pub:'Kingdom (T-36)', category:'Tracts', lang:'Ga', qty:470, avgMovement:5 },
+  { id:'inv_t_37', code:'T-37', pub:'Website tract (T-37)', category:'Tracts', lang:'Ga', qty:260, avgMovement:4 },
+  { id:'inv_wp18_3', code:'wp18.3', pub:'Watchtower (Public)', category:'Public Magazines', lang:'Ga', qty:0, avgMovement:2 },
+  { id:'inv_wp19_1', code:'wp19.1', pub:'Watchtower (Public)', category:'Public Magazines', lang:'Ga', qty:0, avgMovement:2 },
+  { id:'inv_wp20_1', code:'wp20.1', pub:'Watchtower (Public)', category:'Public Magazines', lang:'Ga', qty:0, avgMovement:7 },
+  { id:'inv_wp21_2', code:'wp21.2', pub:'Watchtower (Public)', category:'Public Magazines', lang:'Ga', qty:0, avgMovement:1 },
+  { id:'inv_wp24_1', code:'wp24.1', pub:'Watchtower (Public)', category:'Public Magazines', lang:'Ga', qty:12, avgMovement:4 },
+  { id:'inv_wp25_1', code:'wp25.1', pub:'Watchtower (Public)', category:'Public Magazines', lang:'Ga', qty:0, avgMovement:2 },
+]; }
+
+const STORAGE_KEY = 'cong_lit_app_v4';
+const DEFAULT_STATE = () => ({
+  congregation: { name: 'Usher Town Ga - Accra AA', code:'30197', cutoffDate: '15 September 2026' },
+  languages: ['Ga','English','Twi'],
+  categories: JSON.parse(JSON.stringify(CATEGORIES)),
+  requests: [],
+  recurringRequests: [
+    { id:'rr1', language:'Ga', quantity:30, nextIssue:'March-April 2027' },
+    { id:'rr2', language:'English', quantity:8, nextIssue:'March-April 2027' },
+  ],
+  shipments: [],
+  inventoryReport: { month:'July 2026', language:'Ga', reportsSubmitted:6, reportsTotal:6 },
+  inventory: seedInventory(),
+  rotation: {
+    publishers: ['Ebenezer Nuunu','Jason Kodua','Darlington Johnson','Raphel Nuunu'],
+    coordinator: 'Timothy Danquah',
+    overseer: 'Joseph Martey',
+    meetingTime: '6:30',
+    overseerPin: '1111',
+  },
+  monthlyMovement: [
+    { month:'June 2026', received:120, distributed:96 },
+    { month:'July 2026', received:80, distributed:88 },
+  ],
+  masterPublications: [],
+  otherPubs: [],
+  guidelines: [
+    { id:'s56', code:'S-56', title:'Literature Request and Inventory Guidelines', type:'text',
+      summary:'Key principles for requesting, coordinating, and stocking congregation literature.' },
+    { id:'s60', code:'S-60', title:'List of Publications Approved for Discard', type:'discard',
+      summary:'What may be discarded from congregation literature inventories (not Kingdom Hall libraries).' },
+    { id:'s80', code:'S-80-E-Gh', title:'Public Witnessing Supplies', type:'catalog',
+      summary:'Pricing and specs for literature carts, stands, kiosks, and tables — also loaded into the Public Witnessing category.' },
+    { id:'s14', code:'S-14', title:'Literature Request Form — Master Publications', type:'text',
+      summary:'The official item catalog. It now powers every category under Request a Publication.',
+      sections:[{title:'What this means', points:[
+        'Every publication code and name shown under Request a Publication \u2192 categories comes directly from this form.',
+        'Choose a language first, then browse a category (Bibles, Teaching Toolbox, Books, Brochures and Booklets, Forms and Supplies, Public Witnessing) to request specific items.',
+        'This form also has an "Other Items" section on page 2 for anything not pre-listed — use the Other Publications page in the drawer for that.',
+      ]}] },
+  ],
+});
+
+function loadState(){
+  let raw = null;
+  try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){}
+  if(!raw) return DEFAULT_STATE();
+  try{
+    const parsed = JSON.parse(raw);
+    const seed = DEFAULT_STATE();
+    return {
+      congregation: parsed.congregation || seed.congregation,
+      languages: Array.isArray(parsed.languages) ? parsed.languages : seed.languages,
+      categories: Array.isArray(parsed.categories) ? parsed.categories : seed.categories,
+      requests: Array.isArray(parsed.requests) ? parsed.requests : [],
+      recurringRequests: Array.isArray(parsed.recurringRequests) ? parsed.recurringRequests : seed.recurringRequests,
+      shipments: Array.isArray(parsed.shipments) ? parsed.shipments : [],
+      inventory: Array.isArray(parsed.inventory) ? parsed.inventory : seed.inventory,
+      inventoryReport: parsed.inventoryReport || seed.inventoryReport,
+      rotation: (parsed.rotation && Array.isArray(parsed.rotation.publishers)) ? {...seed.rotation, ...parsed.rotation} : seed.rotation,
+      monthlyMovement: Array.isArray(parsed.monthlyMovement) ? parsed.monthlyMovement : seed.monthlyMovement,
+      masterPublications: Array.isArray(parsed.masterPublications) ? parsed.masterPublications : seed.masterPublications,
+      otherPubs: Array.isArray(parsed.otherPubs) ? parsed.otherPubs : [],
+      guidelines: Array.isArray(parsed.guidelines) && parsed.guidelines.length ? parsed.guidelines : seed.guidelines,
+    };
+  }catch(e){ return DEFAULT_STATE(); }
+}
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+function uid(){ return 'id_' + Date.now() + '_' + Math.floor(Math.random()*10000); }
+function esc(str){ return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+let state = loadState();
+let currentPage = 'home';
+let currentCategoryFilter = null;
+let currentLanguage = state.languages[0];
+
+/* ============================================================
+   TOAST
+============================================================= */
+function toast(msg){
+  const host = document.getElementById('toastHost');
+  host.innerHTML = `<div class="toast" role="status" aria-live="polite">${esc(msg)}</div>`;
+  clearTimeout(window._t);
+  window._t = setTimeout(()=>{ host.innerHTML=''; }, 2000);
+}
+
+/* ============================================================
+   DRAWER
+============================================================= */
+const drawer = document.getElementById('drawer');
+const scrim = document.getElementById('scrim');
+function openDrawer(){ drawer.classList.add('open'); scrim.classList.add('open'); drawer.setAttribute('aria-hidden','false'); document.getElementById('drawerBtn').setAttribute('aria-expanded','true'); }
+function closeDrawer(){ drawer.classList.remove('open'); scrim.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); document.getElementById('drawerBtn').setAttribute('aria-expanded','false'); }
+document.getElementById('drawerBtn').addEventListener('click', openDrawer);
+document.getElementById('drawerCloseBtn').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+let recurringHint = null;
+drawer.querySelectorAll('.drawer-item[data-page]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(!pageAllowedForRole(btn.dataset.page)){ toast('Not available for your role.'); return; }
+    drawer.querySelectorAll('.drawer-item[data-page]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPage = btn.dataset.page;
+    currentCategoryFilter = btn.dataset.cat || null;
+    recurringHint = btn.dataset.hint || null;
+    closeDrawer();
+    render();
+  });
+});
+
+/* ============================================================
+   MODAL helper
+============================================================= */
+function showModal(html){
+  document.getElementById('modalHost').innerHTML = `<div class="modal-scrim" id="modalScrim"><div class="modal">${html}</div></div>`;
+  document.getElementById('modalScrim').addEventListener('click', (e)=>{ if(e.target.id==='modalScrim') closeModal(); });
+}
+function closeModal(){ document.getElementById('modalHost').innerHTML = ''; }
+
+/* ============================================================
+   PAGES
+============================================================= */
+function copiesOnHand(){ return state.inventory.reduce((sum,i)=> sum + (Number(i.qty)||0), 0); }
+
+function pageHome(){
+  const openReq = state.requests.filter(r=>r.status!=='fulfilled').length;
+  const isPublisher = currentUser && currentUser.role === 'publisher';
+  if(isPublisher){
+    return `
+      <div class="eyebrow">${esc(state.congregation.name.toUpperCase())}</div>
+      <h1 class="page-title">Hello, ${esc(currentUser.full_name.split(' ')[0])}</h1>
+      ${myDutyBlock()}
+      <section>
+        <div class="eyebrow-label">Quick Actions</div>
+        <button class="qa-card" onclick="goPage('rotation')">
+          <div><div class="qa-title">Literature display rotation</div><div class="qa-sub">Full schedule and who's up next</div></div>
+          <span class="chev">›</span>
+        </button>
+      </section>
+    `;
+  }
+  return `
+    <div class="eyebrow">${esc(state.congregation.name.toUpperCase())}</div>
+    <h1 class="page-title">Home</h1>
+    <div class="hero-card">
+      <div class="hero-kicker">Congregation workspace</div>
+      <div class="hero-title">Keep every publication request moving.</div>
+      <div class="hero-note">A focused view of your inventory, shipments, recurring requests, and weekly display schedule.</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">Open requests</div><div class="stat-value">${openReq}</div><div class="stat-meta">Awaiting fulfilment</div></div>
+      <div class="stat-card"><div class="stat-label">Copies on hand</div><div class="stat-value">${copiesOnHand()}</div><div class="stat-meta">Across ${state.inventory.length} items</div></div>
+      <div class="stat-card"><div class="stat-label">Languages</div><div class="stat-value">${state.languages.length}</div><div class="stat-meta">Currently served</div></div>
+      <div class="stat-card"><div class="stat-label">Recurring</div><div class="stat-value">${state.recurringRequests.length}</div><div class="stat-meta">Future issues</div></div>
+    </div>
+    <div class="banner"><b>Next shipment cutoff:</b> ${esc(state.congregation.cutoffDate)}</div>
+
+    <section>
+      <div class="section-heading"><div class="eyebrow-label">Quick Actions</div><div class="subtext">Common tasks</div></div>
+      <button class="qa-card" onclick="goPage('inventoryReports')">
+        <div><div class="qa-title">Inventory reports</div><div class="qa-sub">${state.inventory.length} tracked items</div></div>
+        <span class="chev">›</span>
+      </button>
+      <button class="qa-card" onclick="goPage('monthlyMovement')">
+        <div><div class="qa-title">Monthly movement</div><div class="qa-sub">Received and distributed counts</div></div>
+        <span class="chev">›</span>
+      </button>
+      <button class="qa-card" onclick="goPage('rotation')">
+        <div><div class="qa-title">Literature display rotation</div><div class="qa-sub">${state.rotation.publishers.length} publishers rotating weekly</div></div>
+        <span class="chev">›</span>
+      </button>
+    </section>
+
+    <section>
+      <div class="eyebrow-label">At a Glance</div>
+      <button class="glance-row" onclick="goPage('historyRequests')" style="width:100%; text-align:left; border:none; cursor:pointer;"><span class="glance-label">Open requests</span><span class="glance-value">${openReq}</span></button>
+      <button class="glance-row" onclick="goPage('recurringRequests')" style="width:100%; text-align:left; border:none; cursor:pointer;"><span class="glance-label">Recurring requests</span><span class="glance-value">${state.recurringRequests.length}</span></button>
+      <button class="glance-row" onclick="goPage('inventoryReports')" style="width:100%; text-align:left; border:none; cursor:pointer;"><span class="glance-label">Copies on hand</span><span class="glance-value">${copiesOnHand()}</span></button>
+      <button class="glance-row" onclick="goPage('overview')" style="width:100%; text-align:left; border:none; cursor:pointer;"><span class="glance-label">Languages served</span><span class="glance-value">${state.languages.length}</span></button>
+    </section>
+  `;
+}
+
+function pageOverview(){
+  const pending = state.requests.filter(r=>r.status!=='fulfilled').length;
+  const distributed = state.monthlyMovement.reduce((sum,m)=>sum+(Number(m.distributed)||0),0);
+  const received = state.monthlyMovement.reduce((sum,m)=>sum+(Number(m.received)||0),0);
+  const lowStock = state.inventory.filter(i => Number(i.qty) <= Math.max(2, Number(i.avgMovement)||0)).length;
+  return `
+    <div class="eyebrow">${esc(state.congregation.name.toUpperCase())}</div>
+    <h1 class="page-title">Overview</h1>
+    <div class="subtext">A concise operational snapshot for literature coordination.</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">Pending requests</div><div class="stat-value">${pending}</div><div class="stat-meta">Review in Requests</div></div>
+      <div class="stat-card"><div class="stat-label">Low-stock items</div><div class="stat-value">${lowStock}</div><div class="stat-meta">Based on movement</div></div>
+      <div class="stat-card"><div class="stat-label">Received</div><div class="stat-value">${received}</div><div class="stat-meta">Recorded movement</div></div>
+      <div class="stat-card"><div class="stat-label">Distributed</div><div class="stat-value">${distributed}</div><div class="stat-meta">Recorded movement</div></div>
+    </div>
+    <section>
+      <div class="section-heading"><div class="eyebrow-label">Workspace profile</div><div class="subtext">Current configuration</div></div>
+      <div class="item-list">
+        <div class="item-card"><div><div class="item-name">Languages served</div><div class="item-sub">${state.languages.map(esc).join(', ')}</div></div><span class="pill pill-role">${state.languages.length}</span></div>
+        <div class="item-card"><div><div class="item-name">Publication catalog</div><div class="item-sub">${allCatalogItems().length} official items from S-14 plus ${state.masterPublications.length} custom</div></div><span class="pill pill-role">S-14</span></div>
+        <div class="item-card"><div><div class="item-name">Next shipment cutoff</div><div class="item-sub">${esc(state.congregation.cutoffDate)}</div></div><span class="pill pill-pending">Upcoming</span></div>
+      </div>
+    </section>
+    <section>
+      <div class="section-heading"><div class="eyebrow-label">Recommended next steps</div><div class="subtext">Keep records current</div></div>
+      <div class="item-list">
+        ${lowStock ? `<button class="item-card" style="width:100%;text-align:left;cursor:pointer;" onclick="goPage('inventoryReports')"><div><div class="item-name">Review low-stock items</div><div class="item-sub">${lowStock} item${lowStock===1?'':'s'} may need attention based on average movement.</div></div><span class="chev">›</span></button>` : ''}
+        ${pending ? `<button class="item-card" style="width:100%;text-align:left;cursor:pointer;" onclick="goPage('historyRequests')"><div><div class="item-name">Review pending requests</div><div class="item-sub">${pending} request${pending===1?'':'s'} are still open.</div></div><span class="chev">›</span></button>` : ''}
+        <button class="item-card" style="width:100%;text-align:left;cursor:pointer;" onclick="goPage('monthlyMovement')"><div><div class="item-name">Update monthly movement</div><div class="item-sub">Keep received and distributed counts ready for reporting.</div></div><span class="chev">›</span></button>
+      </div>
+    </section>
+  `;
+}
+
+function pageLitCoord(){
+  return `
+    <div class="eyebrow">Settings</div>
+    <h1 class="page-title">Literature Coordination</h1>
+    <section>
+      <label class="field-label">Congregation name</label>
+      <input class="field-input" id="lc_name" value="${esc(state.congregation.name)}" />
+      <label class="field-label">Next shipment cutoff date</label>
+      <input class="field-input" id="lc_cutoff" value="${esc(state.congregation.cutoffDate)}" />
+      <div style="margin-top:1rem;">
+        <button class="btn btn-primary btn-block" onclick="saveLitCoord()">Save changes</button>
+      </div>
+    </section>
+  `;
+}
+function saveLitCoord(){
+  state.congregation.name = document.getElementById('lc_name').value.trim() || state.congregation.name;
+  state.congregation.cutoffDate = document.getElementById('lc_cutoff').value.trim() || state.congregation.cutoffDate;
+  document.getElementById('drawerCong').textContent = state.congregation.name.toUpperCase();
+  saveState(); toast('Congregation details saved.'); render();
+}
+
+function allCatalogItems(){
+  return state.categories.flatMap(c => c.items.map(it => ({...it, category:c.name})));
+}
+function pagePubManagement(){
+  const official = allCatalogItems();
+  const custom = state.masterPublications;
+  return `
+    <div class="eyebrow">Publications</div>
+    <h1 class="page-title">Publication Management</h1>
+    <div class="subtext">${official.length} official items (from S-14) + ${custom.length} custom entries</div>
+
+    <section>
+      <label class="field-label">Search master catalog</label>
+      <input class="field-input" id="mpSearch" placeholder="Search by name or item code" oninput="renderMasterCatalog()" />
+      <div id="masterCatalogHost"></div>
+    </section>
+
+    <section>
+      <div class="eyebrow-label">Custom / Local Entries</div>
+      <button class="btn btn-primary" onclick="openAddMasterPubModal()">+ Add Custom Entry</button>
+      ${custom.length === 0 ? `<div class="empty">No custom entries yet. Use this for items not in the official S-14 catalog.</div>` : `
+        <div class="item-list">
+          ${custom.map(p => `
+            <div class="item-card">
+              <div class="item-name">${esc(p.name)}</div>
+              <button class="btn btn-danger btn-sm" onclick="removeMasterPub('${p.id}')">Remove</button>
+            </div>
+          `).join('')}
+        </div>
+      `}
+    </section>
+  `;
+}
+function renderMasterCatalog(){
+  const host = document.getElementById('masterCatalogHost');
+  if(!host) return;
+  const q = (document.getElementById('mpSearch').value || '').trim().toLowerCase();
+  const items = allCatalogItems().filter(it => !q || (it.name+' '+it.code+' '+it.mnemonic).toLowerCase().includes(q));
+  host.innerHTML = `
+    <table class="simple">
+      <thead><tr><th>Code</th><th>Name</th><th>Category</th></tr></thead>
+      <tbody>
+        ${items.length ? items.map(it => `<tr><td class="mono">${esc(it.code)}</td><td>${esc(it.name)}</td><td>${esc(it.category)}</td></tr>`).join('') : `<tr><td colspan="3">No matching items.</td></tr>`}
+      </tbody>
+    </table>
+  `;
+}
+function openAddMasterPubModal(){
+  showModal(`
+    <h3>Add Publication Name</h3>
+    <label class="field-label">Publication name</label>
+    <input class="field-input" id="mp_name" type="text" placeholder="e.g. Sign Language DVD" />
+    <div style="display:flex; gap:.6rem; margin-top:1.2rem;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveMasterPub()">Add</button>
+    </div>
+  `);
+}
+function saveMasterPub(){
+  const name = document.getElementById('mp_name').value.trim();
+  if(!name){ toast('Please enter a publication name.'); return; }
+  state.masterPublications.push({ id:uid(), name });
+  saveState(); closeModal(); render(); toast('Publication added.');
+}
+function removeMasterPub(id){
+  state.masterPublications = state.masterPublications.filter(p=>p.id!==id);
+  saveState(); render();
+}
+
+function pageGuidelines(){
+  const rows = state.guidelines;
+  return `
+    <div class="eyebrow">Reference</div>
+    <h1 class="page-title">Instructions &amp; Guidelines</h1>
+    <div class="subtext">${rows.length} documents</div>
+    <section>
+      <button class="btn btn-primary" onclick="openAddGuidelineModal()">+ Add Document</button>
+    </section>
+    <section>
+      ${rows.length === 0 ? `<div class="empty">No documents added yet.</div>` : `
+        <div class="item-list">
+          ${rows.map(g => `
+            <button class="item-card" style="width:100%; text-align:left; border:1px solid var(--border); cursor:pointer;" onclick="openGuidelineDetail('${g.id}')">
+              <div><div class="item-name">${esc(g.code ? g.code+' — '+g.title : g.title)}</div>${g.summary ? `<div class="item-sub">${esc(g.summary)}</div>` : (g.notes ? `<div class="item-sub">${esc(g.notes)}</div>` : '')}</div>
+              <span class="chev">›</span>
+            </button>
+          `).join('')}
+        </div>
+      `}
+    </section>
+  `;
+}
+function openGuidelineDetail(id){
+  const g = state.guidelines.find(x=>x.id===id);
+  if(!g) return;
+  let body = '';
+  if(g.type === 'discard'){
+    body = DISCARD_LIST.map(group => `
+      <h3 style="margin-top:1rem;">${esc(group.group)}</h3>
+      <table class="simple">
+        <thead><tr><th>Item</th><th>Action</th></tr></thead>
+        <tbody>${group.items.map(it => `<tr><td>${esc(it.name)}</td><td>${esc(it.action)}</td></tr>`).join('')}</tbody>
+      </table>
+    `).join('');
+    body = `<p class="text-sm muted" style="margin:0 0 .5rem;">This list applies to congregation literature inventories only — not Kingdom Hall libraries. Discard any publication with damaged or yellowed pages first.</p>` + body;
+  } else if(g.type === 'catalog'){
+    const items = state.categories.find(c=>c.name==='Public Witnessing').items;
+    body = `
+      <table class="simple">
+        <thead><tr><th>Code</th><th>Item</th><th>Spec / Price</th></tr></thead>
+        <tbody>${items.map(it => `<tr><td class="mono">${esc(it.code)}</td><td>${esc(it.name)}</td><td>${esc(it.spec||'—')}</td></tr>`).join('')}</tbody>
+      </table>
+    `;
+  } else {
+    const sections = g.sections || (g.id === 's56' ? GUIDE_S56 : []);
+    body = sections.map(s => `
+      <h3 style="margin-top:1rem;">${esc(s.title)}</h3>
+      <ul style="margin:.4rem 0 0; padding-left:1.1rem;">
+        ${s.points.map(p => `<li class="text-sm muted-strong" style="margin-bottom:.5rem;">${esc(p)}</li>`).join('')}
+      </ul>
+    `).join('');
+  }
+  showModal(`
+    <h3>${esc(g.code ? g.code+' — '+g.title : g.title)}</h3>
+    ${body}
+    <div style="margin-top:1.2rem;">
+      <button class="btn btn-ghost btn-block" onclick="closeModal()">Close</button>
+    </div>
+  `);
+}
+function openAddGuidelineModal(){
+  showModal(`
+    <h3>Add Document</h3>
+    <label class="field-label">Title</label>
+    <input class="field-input" id="gl_title" type="text" placeholder="e.g. Literature Servant Guidelines" />
+    <label class="field-label">Notes</label>
+    <input class="field-input" id="gl_notes" type="text" placeholder="Optional reference notes" />
+    <div style="display:flex; gap:.6rem; margin-top:1.2rem;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveGuideline()">Add</button>
+    </div>
+  `);
+}
+function saveGuideline(){
+  const title = document.getElementById('gl_title').value.trim();
+  const notes = document.getElementById('gl_notes').value.trim();
+  if(!title){ toast('Please enter a title.'); return; }
+  state.guidelines.push({ id:uid(), title, notes, type:'text', sections:[] });
+  saveState(); closeModal(); render(); toast('Document added.');
+}
+function removeGuideline(id){
+  state.guidelines = state.guidelines.filter(g=>g.id!==id);
+  saveState(); render();
+}
+
+/* ============================================================
+   OTHER PUBLICATIONS (special-request items — S-56 §4(2)/(4), S-57)
+============================================================= */
+function pageOtherPubs(){
+  const rows = [...state.otherPubs].sort((a,b)=> b.date.localeCompare(a.date));
+  return `
+    <div class="eyebrow">Requests</div>
+    <h1 class="page-title">Other Publications</h1>
+    <div class="subtext">Special-request items (annual items, Memorial/convention invitations, badge cards) and literature in non-coordinated languages. Per S-56, these are usually not kept in stock — distribute as soon as received.</div>
+    <section>
+      <button class="btn btn-primary" onclick="openAddOtherPubModal()">+ Log a Special Request</button>
+    </section>
+    <section>
+      ${rows.length === 0 ? `<div class="empty">No special-request items logged yet.</div>` : `
+        <div class="item-list">
+          ${rows.map(o => `
+            <div class="item-card">
+              <div>
+                <div class="item-name">${esc(o.item)}</div>
+                <div class="item-sub">${esc(o.date)}${o.requester ? ' · Requested by ' + esc(o.requester) : ''}</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:.5rem;">
+                <span class="pill ${o.status==='distributed' ? 'pill-ok' : 'pill-pending'}">${o.status==='distributed' ? 'Distributed' : 'Pending'}</span>
+                <button class="btn btn-ghost btn-sm" onclick="toggleOtherPubStatus('${o.id}')">${o.status==='distributed' ? 'Undo' : 'Mark distributed'}</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `}
+    </section>
+  `;
+}
+function openAddOtherPubModal(){
+  showModal(`
+    <h3>Log a Special Request</h3>
+    <label class="field-label">Item</label>
+    <input class="field-input" id="op_item" type="text" placeholder="e.g. Memorial invitation" />
+    <label class="field-label">Requested by</label>
+    <input class="field-input" id="op_requester" type="text" placeholder="Publisher's name (optional)" />
+    <div style="display:flex; gap:.6rem; margin-top:1.2rem;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveOtherPub()">Add</button>
+    </div>
+  `);
+}
+function saveOtherPub(){
+  const item = document.getElementById('op_item').value.trim();
+  const requester = document.getElementById('op_requester').value.trim();
+  if(!item){ toast('Please enter an item.'); return; }
+  state.otherPubs.push({ id:uid(), item, requester, date:new Date().toISOString().slice(0,10), status:'pending' });
+  saveState(); closeModal(); render(); toast('Special request logged.');
+}
+function toggleOtherPubStatus(id){
+  const o = state.otherPubs.find(x=>x.id===id);
+  if(o) o.status = o.status==='distributed' ? 'pending' : 'distributed';
+  saveState(); render();
+}
+
+function pageRequestPublication(){
+  const cats = state.categories;
+  const filtered = currentCategoryFilter
+    ? cats.filter(c => c.name === currentCategoryFilter)
+    : cats;
+  return `
+    <div class="eyebrow">${esc(state.congregation.name.toUpperCase())}</div>
+    <h1 class="page-title">Request a Publication</h1>
+    <div class="banner"><b>Cutoff date for your next shipment:</b> ${esc(state.congregation.cutoffDate)}</div>
+
+    <section>
+      <label class="field-label">Publication Language</label>
+      <select class="field-select" id="reqLang" onchange="currentLanguage=this.value; render();">
+        ${state.languages.map(l => `<option value="${esc(l)}" ${l===currentLanguage?'selected':''}>${esc(l)}</option>`).join('')}
+      </select>
+    </section>
+
+    <section>
+      <label class="field-label">Publication</label>
+      <div class="search-row">
+        <input class="field-input" id="pubSearch" aria-label="Search publications" placeholder="Search by title, code, or mnemonic" oninput="renderPubList()" />
+        <button class="search-btn" type="button" aria-label="Search publications" tabindex="-1">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#A0A0A0" stroke-width="2"/><path d="M21 21l-4-4" stroke="#A0A0A0" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      ${currentCategoryFilter ? `
+        <h2 class="section-title">${esc(currentCategoryFilter)}</h2>
+        <div id="pubListHost"></div>
+      ` : `
+        <h2 class="section-title">Categories</h2>
+        <div class="cat-list">
+          ${filtered.map(c => `<button class="cat-item" onclick="filterCategory('${c.name.replace(/'/g,"\\'")}')">${esc(c.name)} <span class="chev">›</span></button>`).join('')}
+        </div>
+      `}
+    </section>
+  `;
+}
+function filterCategory(name){ currentCategoryFilter = name; render(); }
+function renderPubList(){
+  const host = document.getElementById('pubListHost');
+  if(!host) return;
+  const q = (document.getElementById('pubSearch').value || '').trim().toLowerCase();
+  const cat = state.categories.find(c => c.name === currentCategoryFilter);
+  const items = (cat ? cat.items : []).filter(it => !q || (it.name+' '+it.code+' '+it.mnemonic).toLowerCase().includes(q));
+  host.innerHTML = `
+    <div class="item-list">
+      ${items.length ? items.map(it => `
+        <div class="item-card">
+          <div>
+            <div class="item-name">${esc(it.name)}</div>
+            <div class="item-sub mono">${esc(it.code)}${it.spec ? ' · ' + esc(it.spec) : ''}</div>
+          </div>
+          <button class="add-btn" onclick="addRequestItem('${it.id}','${esc(it.name).replace(/'/g,"\\'")}','${esc(it.code)}')">Request</button>
+        </div>
+      `).join('') : `<div class="empty">No matching publication in this category.</div>`}
+    </div>
+  `;
+}
+function addRequestItem(itemId, name, code){
+  state.requests.push({ id:uid(), date:new Date().toISOString().slice(0,10), language:currentLanguage, publication:name, code:code||'', qty:1, status:'pending' });
+  saveState();
+  toast(`${name} added to your request.`);
+}
+
+function pageRecurringRequests(){
+  const rows = state.recurringRequests;
+  return `
+    <div class="eyebrow">${esc(state.congregation.name.toUpperCase())}</div>
+    <h1 class="page-title">Recurring Requests for Future Issues</h1>
+    ${recurringHint ? `<div class="banner" style="border-radius:14px;">Per S-56: base your <b>${esc(recurringHint)}</b> quantity on individuals who specifically ask for a printed copy, plus a few spares — reduce it if copies are left over.</div>` : ''}
+    <section>
+      <button class="btn btn-primary" onclick="openAddRecurringModal()">+ Add Recurring Request</button>
+    </section>
+    <section>
+      ${rows.length === 0 ? `<div class="empty">No recurring requests set up yet.</div>` : rows.map(r => `
+        <div class="rr-card" id="rr_${r.id}">
+          <div class="rr-lang">${esc(r.language)}</div>
+          <div class="rr-grid">
+            <div>
+              <div class="rr-label">Quantity</div>
+              <div class="rr-val" data-view="qty">${r.quantity}</div>
+              <input class="rr-val editable-input" data-edit="qty" type="number" min="0" value="${r.quantity}" style="display:none;" />
+            </div>
+            <div>
+              <div class="rr-label">Next Issue</div>
+              <div class="rr-val" style="font-size:1.05rem;" data-view="issue">${esc(r.nextIssue)}</div>
+              <input class="rr-val editable-input" data-edit="issue" type="text" value="${esc(r.nextIssue)}" style="display:none; font-size:1.05rem;" />
+            </div>
+          </div>
+          <div class="rr-actions">
+            <button class="btn btn-ghost btn-sm" data-action="edit" onclick="toggleEditRR('${r.id}')">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="removeRR('${r.id}')">Remove</button>
+          </div>
+        </div>
+      `).join('')}
+    </section>
+  `;
+}
+function toggleEditRR(id){
+  const card = document.getElementById('rr_'+id);
+  const editing = card.dataset.editing === 'true';
+  card.querySelectorAll('[data-view]').forEach(el => el.style.display = editing ? '' : 'none');
+  card.querySelectorAll('[data-edit]').forEach(el => el.style.display = editing ? 'none' : '');
+  const btn = card.querySelector('[data-action="edit"]');
+  if(editing){
+    const qty = Number(card.querySelector('[data-edit="qty"]').value) || 0;
+    const issue = card.querySelector('[data-edit="issue"]').value.trim();
+    const r = state.recurringRequests.find(x=>x.id===id);
+    if(r){ r.quantity = qty; r.nextIssue = issue || r.nextIssue; }
+    saveState();
+    card.dataset.editing = 'false';
+    btn.textContent = 'Edit';
+    render();
+    toast('Recurring request updated.');
+  } else {
+    card.dataset.editing = 'true';
+    btn.textContent = 'Save';
+  }
+}
+function removeRR(id){
+  if(!confirm('Remove this recurring request?')) return;
+  state.recurringRequests = state.recurringRequests.filter(r=>r.id!==id);
+  saveState(); render(); toast('Recurring request removed.');
+}
+function openAddRecurringModal(){
+  showModal(`
+    <h3>Add Recurring Request</h3>
+    <label class="field-label">Language</label>
+    <select class="field-select" id="rr_lang">
+      ${state.languages.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join('')}
+    </select>
+    <label class="field-label">Quantity</label>
+    <input class="field-input" id="rr_qty" type="number" min="0" value="1" />
+    <label class="field-label">Next Issue</label>
+    <input class="field-input" id="rr_issue" type="text" placeholder="e.g. March-April 2027" />
+    <div style="display:flex; gap:.6rem; margin-top:1.2rem;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveNewRecurring()">Add</button>
+    </div>
+  `);
+}
+function saveNewRecurring(){
+  const lang = document.getElementById('rr_lang').value;
+  const qty = Number(document.getElementById('rr_qty').value) || 0;
+  const issue = document.getElementById('rr_issue').value.trim();
+  if(!issue){ toast('Please enter the next issue.'); return; }
+  state.recurringRequests.push({ id:uid(), language:lang, quantity:qty, nextIssue:issue });
+  saveState(); closeModal(); render(); toast('Recurring request added.');
+}
+
+function pageHistoryRequests(){
+  const rows = [...state.requests].sort((a,b)=> b.date.localeCompare(a.date));
+  return `
+    <div class="eyebrow">History</div>
+    <h1 class="page-title">Requests</h1>
+    <section>
+      ${rows.length === 0 ? `<div class="empty">No requests logged yet. Add publications from "Request a Publication".</div>` : `
+        <table class="simple">
+          <thead><tr><th>Date</th><th>Publication</th><th>Lang</th><th>Status</th></tr></thead>
+          <tbody>
+            ${rows.map(r => `<tr>
+              <td>${esc(r.date)}</td><td>${esc(r.publication)}</td><td>${esc(r.language)}</td>
+              <td>${r.status==='fulfilled' ? '<span class="pill pill-ok">Fulfilled</span>' : '<span class="pill pill-pending">Pending</span>'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      `}
+    </section>
+  `;
+}
+
+function pageHistoryShipments(){
+  const rows = [...state.shipments].sort((a,b)=> b.date.localeCompare(a.date));
+  return `
+    <div class="eyebrow">History</div>
+    <h1 class="page-title">Shipments</h1>
+    <section>
+      <button class="btn btn-primary" onclick="openAddShipmentModal()">+ Log a Shipment</button>
+    </section>
+    <section>
+      ${rows.length === 0 ? `<div class="empty">No shipments logged yet.</div>` : rows.map(s => `
+        <div class="item-card" style="align-items:flex-start;">
+          <div>
+            <div class="item-name">${esc(s.date)}</div>
+            <div class="item-sub">${esc(s.notes || '')}</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="removeShipment('${s.id}')">Remove</button>
+        </div>
+      `).join('')}
+    </section>
+  `;
+}
+function openAddShipmentModal(){
+  showModal(`
+    <h3>Log a Shipment</h3>
+    <label class="field-label">Date received</label>
+    <input class="field-input" id="sh_date" type="date" value="${new Date().toISOString().slice(0,10)}" />
+    <label class="field-label">Notes</label>
+    <input class="field-input" id="sh_notes" type="text" placeholder="e.g. 2 boxes — Ga & English" />
+    <div style="display:flex; gap:.6rem; margin-top:1.2rem;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveNewShipment()">Save</button>
+    </div>
+  `);
+}
+function saveNewShipment(){
+  const date = document.getElementById('sh_date').value || new Date().toISOString().slice(0,10);
+  const notes = document.getElementById('sh_notes').value.trim();
+  state.shipments.push({ id:uid(), date, notes });
+  saveState(); closeModal(); render(); toast('Shipment logged.');
+}
+function removeShipment(id){
+  state.shipments = state.shipments.filter(s=>s.id!==id);
+  saveState(); render();
+}
+
+const INVENTORY_CATEGORY_ORDER = ['Bibles','Books','Brochures and Booklets','Forms and Supplies','Tracts','Public Magazines'];
+function pageInventoryReports(){
+  const rep = state.inventoryReport;
+  const rows = state.inventory;
+  const grouped = INVENTORY_CATEGORY_ORDER.map(cat => ({ cat, items: rows.filter(r=>r.category===cat) }))
+    .concat([{ cat:'Other', items: rows.filter(r=>!INVENTORY_CATEGORY_ORDER.includes(r.category)) }])
+    .filter(g => g.items.length > 0);
+
+  return `
+    <div class="eyebrow">${esc(state.congregation.name)}${state.congregation.code ? ' ('+esc(state.congregation.code)+')' : ''}</div>
+    <h1 class="page-title">Monthly Movement of Literature</h1>
+    <div class="subtext">Recent Reports Submitted: ${rep.reportsSubmitted} of ${rep.reportsTotal}</div>
+    <div class="subtext" style="font-weight:700; color:#fff;">${esc(rep.month)} | ${esc(rep.language)}</div>
+    <div class="subtext">${copiesOnHand()} copies on hand across ${rows.length} tracked items</div>
+
+    <section>
+      <button class="btn btn-primary" onclick="openAddInventoryModal()">+ Add Inventory Item</button>
+    </section>
+
+    ${rows.length === 0 ? `<section><div class="empty">No inventory tracked yet.</div></section>` : grouped.map(g => `
+      <section>
+        <h2 class="section-title">${esc(g.cat)}</h2>
+        <table class="simple">
+          <thead><tr><th>Item</th><th>On Hand</th><th>Avg. Movement</th><th></th></tr></thead>
+          <tbody>
+            ${g.items.map(i => `
+              <tr>
+                <td>${esc(i.pub)} <span class="mono" style="color:var(--muted2); font-size:11px;">(${esc(i.code||'')})</span></td>
+                <td><input class="field-input" style="min-height:36px; padding:0 .4rem; width:64px;" type="number" value="${i.qty}" onchange="updateInventoryField('${i.id}','qty',this.value)" /></td>
+                <td><input class="field-input" style="min-height:36px; padding:0 .4rem; width:64px;" type="number" value="${i.avgMovement}" onchange="updateInventoryField('${i.id}','avgMovement',this.value)" /></td>
+                <td><button class="btn btn-danger btn-sm" onclick="removeInventory('${i.id}')">✕</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </section>
+    `).join('')}
+  `;
+}
+function updateInventoryField(id, field, value){
+  const item = state.inventory.find(i=>i.id===id);
+  if(!item) return;
+  item[field] = Number(value) || 0;
+  saveState();
+  render();
+  toast('Updated.');
+}
+function openAddInventoryModal(){
+  showModal(`
+    <h3>Add Inventory Item</h3>
+    <label class="field-label">Publication</label>
+    <input class="field-input" id="inv_pub" type="text" placeholder="Publication name" />
+    <label class="field-label">Item code (mnemonic)</label>
+    <input class="field-input" id="inv_code" type="text" placeholder="e.g. lff" />
+    <label class="field-label">Category</label>
+    <select class="field-select" id="inv_cat">${INVENTORY_CATEGORY_ORDER.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select>
+    <label class="field-label">Language</label>
+    <select class="field-select" id="inv_lang">${state.languages.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join('')}</select>
+    <label class="field-label">Current quantity on hand</label>
+    <input class="field-input" id="inv_qty" type="number" value="0" />
+    <label class="field-label">Average monthly movement</label>
+    <input class="field-input" id="inv_avg" type="number" value="0" />
+    <div style="display:flex; gap:.6rem; margin-top:1.2rem;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveNewInventory()">Add</button>
+    </div>
+  `);
+}
+function saveNewInventory(){
+  const pub = document.getElementById('inv_pub').value.trim();
+  const code = document.getElementById('inv_code').value.trim();
+  const category = document.getElementById('inv_cat').value;
+  const lang = document.getElementById('inv_lang').value;
+  const qty = Number(document.getElementById('inv_qty').value) || 0;
+  const avgMovement = Number(document.getElementById('inv_avg').value) || 0;
+  if(!pub){ toast('Please enter a publication name.'); return; }
+  state.inventory.push({ id:uid(), pub, code, category, lang, qty, avgMovement });
+  saveState(); closeModal(); render(); toast('Inventory item added.');
+}
+function removeInventory(id){
+  state.inventory = state.inventory.filter(i=>i.id!==id);
+  saveState(); render();
+}
+
+
+function pageMonthlyMovement(){
+  const rows = state.monthlyMovement;
+  return `
+    <div class="eyebrow">Inventory</div>
+    <h1 class="page-title">Monthly Movement</h1>
+    <section>
+      <button class="btn btn-primary" onclick="openAddMovementModal()">+ Add Month</button>
+    </section>
+    <section>
+      ${rows.length === 0 ? `<div class="empty">No monthly movement recorded yet.</div>` : `
+        <table class="simple">
+          <thead><tr><th>Month</th><th>Received</th><th>Distributed</th><th>Net</th></tr></thead>
+          <tbody>
+            ${rows.map(m => `<tr>
+              <td>${esc(m.month)}</td><td>${m.received}</td><td>${m.distributed}</td>
+              <td>${m.received - m.distributed >= 0 ? '+' : ''}${m.received - m.distributed}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      `}
+    </section>
+  `;
+}
+function openAddMovementModal(){
+  showModal(`
+    <h3>Add Monthly Movement</h3>
+    <label class="field-label">Month</label>
+    <input class="field-input" id="mv_month" type="text" placeholder="e.g. August 2026" />
+    <label class="field-label">Received</label>
+    <input class="field-input" id="mv_recv" type="number" min="0" value="0" />
+    <label class="field-label">Distributed</label>
+    <input class="field-input" id="mv_dist" type="number" min="0" value="0" />
+    <div style="display:flex; gap:.6rem; margin-top:1.2rem;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveNewMovement()">Add</button>
+    </div>
+  `);
+}
+function saveNewMovement(){
+  const month = document.getElementById('mv_month').value.trim();
+  const received = Number(document.getElementById('mv_recv').value) || 0;
+  const distributed = Number(document.getElementById('mv_dist').value) || 0;
+  if(!month){ toast('Please enter a month.'); return; }
+  state.monthlyMovement.push({ month, received, distributed });
+  saveState(); closeModal(); render(); toast('Monthly movement added.');
+}
+
+/* ============================================================
+   LITERATURE DISPLAY ROTATION
+   Rotation data (publisher order, meeting time, coordinator &
+   overseer names) is stored locally on this device in
+   state.rotation (localStorage), same as the rest of the app's data.
+============================================================= */
+function isoWeek(date){
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+function currentRotationIndex(){
+  const r = state.rotation;
+  if(!r.publishers.length) return -1;
+  return isoWeek(new Date()) % r.publishers.length;
+}
+function canManageRotation(){ return true; }
+function canShareRotation(){ return true; }
+function renderRotationLive(){ /* rotation lives in local state; nothing to fetch */ }
+function myDutyBlock(){
+  if(!currentUser || currentUser.role !== 'publisher') return '';
+  const r = state.rotation;
+  const idx = currentRotationIndex();
+  const myIdx = r.publishers.findIndex(p => p.trim().toLowerCase() === currentUser.full_name.trim().toLowerCase());
+  const isMe = myIdx >= 0 && myIdx === idx;
+  let nextText = '\u2014';
+  if(myIdx >= 0 && r.publishers.length){
+    let stepsAhead = (myIdx - idx + r.publishers.length) % r.publishers.length;
+    if(stepsAhead === 0) stepsAhead = r.publishers.length;
+    const weeksOut = stepsAhead;
+    nextText = weeksOut === r.publishers.length && isMe ? 'This week' : `In ${weeksOut} week${weeksOut===1?'':'s'}`;
+  }
+  return `
+    <div class="duty-card">
+      <div class="duty-eyebrow">My Literature Display Duty</div>
+      <div class="duty-name">${isMe ? "You're on duty this week" : 'You are not assigned this week'}</div>
+      ${!isMe ? `<div class="subtext" style="color:#E7B98A;margin-top:.3rem;">Next time you are scheduled: ${myIdx>=0 ? esc(nextText) : 'not currently on the rotation list'}.</div>` : ''}
+      <div class="duty-grid">
+        <div><div class="duty-label">Meeting Time</div><div class="duty-val">${esc(r.meetingTime || '\u2014')}</div></div>
+        <div><div class="duty-label">Next Assignment</div><div class="duty-val">${esc(nextText)}</div></div>
+      </div>
+    </div>`;
+}
+function pageRotation(){
+  const r = state.rotation;
+  const idx = currentRotationIndex();
+  const onDuty = idx >= 0 ? r.publishers[idx] : null;
+  const nextIdx = idx >= 0 ? (idx + 1) % r.publishers.length : -1;
+  const nextUp = nextIdx >= 0 ? r.publishers[nextIdx] : null;
+
+  return `
+    <div class="eyebrow">Literature Display</div>
+    <h1 class="page-title">Weekly Rotation</h1>
+
+    <section style="margin-top:1rem;">
+      <div class="duty-card">
+        <div class="duty-eyebrow">This Week's Literature Display</div>
+        <div class="duty-name">${onDuty ? esc(onDuty) : '\u2014'}</div>
+        <div class="duty-grid">
+          <div><div class="duty-label">Meeting Time</div><div class="duty-val">${esc(r.meetingTime || '\u2014')}</div></div>
+          <div><div class="duty-label">Next Week</div><div class="duty-val">${nextUp ? esc(nextUp) : '\u2014'}</div></div>
+        </div>
+      </div>
+    </section>
+
+    ${myDutyBlock()}
+
+    <section>
+      <div class="eyebrow-label">Full Rotation</div>
+      <div class="item-list">
+        ${r.publishers.map((p,i) => `
+          <div class="item-card" style="${i===idx ? 'border:1px solid var(--accent);' : ''}">
+            <div class="item-name">${i+1}. ${esc(p)}</div>
+            ${i===idx ? `<span class="pill pill-ok">This week</span>` : ''}
+          </div>
+        `).join('')}
+        ${!r.publishers.length ? `<div class="empty">No publishers on the rotation yet.</div>` : ''}
+      </div>
+    </section>
+
+    <section>
+      <div class="eyebrow-label">Coordinator &amp; Overseer</div>
+      <div class="item-list">
+        <div class="item-card"><div><div class="item-name">${esc(r.coordinator || '\u2014')}</div><div class="item-sub">Coordinator</div></div></div>
+        <div class="item-card"><div><div class="item-name">${esc(r.overseer || '\u2014')}</div><div class="item-sub">Overseer</div></div></div>
+      </div>
+    </section>
+
+    ${canManageRotation() ? `
+    <section>
+      <div class="eyebrow-label">Manage Rotation</div>
+      <div class="subtext" style="margin-top:0;">Edit the publisher order and meeting time. Changes save to the shared roster for everyone.</div>
+      <button class="btn btn-primary btn-block" style="margin-top:.8rem;" onclick="openEditRotationModal()">Edit Rotation</button>
+    </section>` : ''}
+
+    <section>
+      <div class="eyebrow-label">Share</div>
+      <div class="subtext" style="margin-top:0;">${canShareRotation() ? 'You are authorized to share this schedule outside the app.' : 'Viewing only — sharing is limited to the Overseer, Coordinator, and anyone they authorize.'}</div>
+      ${canShareRotation() ? `<button class="btn btn-primary btn-block" style="margin-top:.8rem;" onclick="attemptShareRotation()">Share Schedule</button>` : ''}
+    </section>
+  `;
+}
+function rotationShareText(){
+  const r = state.rotation;
+  const idx = currentRotationIndex();
+  const lines = [
+    `Literature Display Rotation — ${state.congregation.name}`,
+    `Publishers rotate weekly to display literature before meetings start at ${r.meetingTime}.`,
+    ``,
+    `This week on duty: ${idx>=0 ? r.publishers[idx] : '—'}`,
+    ``,
+    `Rotation order:`,
+    ...r.publishers.map((p,i)=> `${i+1}. ${p}${i===idx ? '  <- this week' : ''}`),
+    ``,
+    `Coordinator: ${r.coordinator}`,
+    `Overseer: ${r.overseer}`,
+  ];
+  return lines.join('\n');
+}
+async function attemptShareRotation(){
+  if(!canShareRotation()){ toast('You are not authorized to share this schedule.'); return; }
+  const text = rotationShareText();
+  try{
+    if(navigator.share){
+      await navigator.share({ title:'Literature Display Rotation', text });
+      toast('Schedule shared.');
+      return;
+    }
+  }catch(e){ /* user cancelled share sheet — fall through to copy */ }
+  try{
+    await navigator.clipboard.writeText(text);
+    toast('Schedule copied to clipboard.');
+  }catch(e){
+    toast('Could not share automatically — schedule is ready to copy manually.');
+  }
+}
+function openEditRotationModal(){
+  if(!canManageRotation()){ toast('Only the Overseer or Coordinator can edit the rotation.'); return; }
+  const r = state.rotation;
+  showModal(`
+    <h3>Edit Rotation</h3>
+    <label class="field-label">Publishers (one name per line, in order)</label>
+    <textarea class="field-input" id="er_pubs" rows="5" style="min-height:110px;padding:.7rem .9rem;">${esc(r.publishers.join('\n'))}</textarea>
+    <label class="field-label">Meeting Time</label>
+    <input class="field-input" id="er_time" value="${esc(r.meetingTime)}" />
+    <label class="field-label">Coordinator</label>
+    <input class="field-input" id="er_coord" value="${esc(r.coordinator)}" />
+    <label class="field-label">Overseer</label>
+    <input class="field-input" id="er_overseer" value="${esc(r.overseer)}" />
+    <div style="display:flex; gap:.6rem; margin-top:1.2rem;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveRotationEdit()">Save</button>
+    </div>
+  `);
+}
+function saveRotationEdit(){
+  const pubs = document.getElementById('er_pubs').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  state.rotation = {
+    publishers: pubs,
+    meetingTime: document.getElementById('er_time').value.trim(),
+    coordinator: document.getElementById('er_coord').value.trim(),
+    overseer: document.getElementById('er_overseer').value.trim(),
+  };
+  saveState();
+  closeModal();
+  render();
+  toast('Rotation updated.');
+}
+
+/* ============================================================
+   ROUTER
+============================================================= */
+const PAGE_TITLES = {
+  home:'Home', overview:'Overview', litcoord:'Literature Coordination',
+  pubManagement:'Publications', guidelines:'Guidelines',
+  requestPublication:'Request', recurringRequests:'Recurring',
+  otherPubs:'Other Publications', rotation:'Display Rotation',
+  historyRequests:'Requests', historyShipments:'Shipments',
+  inventoryReports:'Inventory', monthlyMovement:'Movement'
+};
+function goPage(p){
+  if(!pageAllowedForRole(p)){ toast('Not available for your role.'); p = 'home'; }
+  currentPage = p; currentCategoryFilter = null; recurringHint = null;
+  drawer.querySelectorAll('.drawer-item[data-page]').forEach(b=>b.classList.toggle('active', b.dataset.page===p && !b.dataset.cat && !b.dataset.hint));
+  render();
+}
+function render(){
+  if(!currentUser) return;
+  if(!pageAllowedForRole(currentPage)) currentPage = 'home';
+  document.getElementById('topbarTitle').textContent = PAGE_TITLES[currentPage] || 'Home';
+  const app = document.getElementById('app');
+  switch(currentPage){
+    case 'home': app.innerHTML = pageHome(); break;
+    case 'overview': app.innerHTML = pageOverview(); break;
+    case 'litcoord': app.innerHTML = pageLitCoord(); break;
+    case 'pubManagement': app.innerHTML = pagePubManagement(); renderMasterCatalog(); break;
+    case 'guidelines': app.innerHTML = pageGuidelines(); break;
+    case 'rotation': app.innerHTML = pageRotation(); renderRotationLive(); break;
+    case 'requestPublication': app.innerHTML = pageRequestPublication(); renderPubList(); break;
+    case 'recurringRequests': app.innerHTML = pageRecurringRequests(); break;
+    case 'otherPubs': app.innerHTML = pageOtherPubs(); break;
+    case 'historyRequests': app.innerHTML = pageHistoryRequests(); break;
+    case 'historyShipments': app.innerHTML = pageHistoryShipments(); break;
+    case 'inventoryReports': app.innerHTML = pageInventoryReports(); break;
+    case 'monthlyMovement': app.innerHTML = pageMonthlyMovement(); break;
+    default: app.innerHTML = pageHome();
+  }
+}
+document.addEventListener('keydown', (event)=>{
+  if(event.key === 'Escape'){
+    if(document.getElementById('modalHost').innerHTML) closeModal();
+    else closeDrawer();
+  }
+});
+document.querySelector('.drawer-item[data-page="home"]').classList.add('active');
+render();
+</script>
+</body>
+</html>
